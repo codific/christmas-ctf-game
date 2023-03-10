@@ -1,0 +1,32 @@
+version: "3"
+services:
+  webshop:
+    build: .
+    ports:
+      - 9090:80
+    container_name: webshop1
+    restart: always
+    depends_on: 
+      - database
+
+  database:
+    image: mariadb:10.9.4
+    container_name: database1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ctf
+    restart: always
+    volumes:
+      - ./dump:/docker-entrypoint-initdb.d
+      
+  cypress_service:
+      build: ./cypress
+      container_name: cypress1
+      depends_on:
+        - webshop
+        - database
+      environment:
+        - CYPRESS_baseUrl=http://webshop
+      volumes:
+        - ./cypress/cypress:/app/cypress
+        - ./cypress/cypress.config.js:/app/cypress.config.js  
